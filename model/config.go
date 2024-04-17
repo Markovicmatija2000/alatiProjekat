@@ -1,11 +1,14 @@
 package model
 
 type Config struct {
-	//TODO: dodati atribute
+	Name    string            `json:"name"`
+	Version int               `json:"version"`
+	Params  map[string]string `json:"params"`
 }
 
 // TODO: Dodati metode
 
 type ConfigRepository interface {
-	//TODO: dodati metode
+	Add(config Config)
+	Get(name string, version int) (Config, error)
 }

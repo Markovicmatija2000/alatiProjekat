@@ -18,3 +18,5 @@ func NewConfigService(repo model.ConfigRepository) ConfigService {
 func (s ConfigService) Hello() {
 	fmt.Println("Pozdrav :)")
 }
+
+// todo: implementiraj metode za dodavanje, brisanje, dobavljanje itd.
