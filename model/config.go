@@ -11,4 +11,6 @@ type Config struct {
 type ConfigRepository interface {
 	Add(config Config)
 	Get(name string, version int) (Config, error)
+	Delete(name string, version int) error
+	NewConfigFromLiteral(literal string) (Config, error)
 }

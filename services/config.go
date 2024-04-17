@@ -19,4 +19,12 @@ func (s ConfigService) Hello() {
 	fmt.Println("Pozdrav :)")
 }
 
-// todo: implementiraj metode za dodavanje, brisanje, dobavljanje itd.
+
+
+func (s ConfigService) Add(config model.Config) {
+	s.repo.Add(config)
+}
+
+func (s ConfigService) Get(name string, version int) (model.Config, error) {
+	return s.repo.Get(name, version)
+}
