@@ -13,7 +13,7 @@ func main() {
 	service := services.NewConfigService(repo)
 	params := make(map[string]string)
 	params["username"] = "pera"
-	params["port"] = "5432"
+	params["port"] = "5431"
 	config := model.Config{
 		Name:    "db_config",
 		Version: 2,
