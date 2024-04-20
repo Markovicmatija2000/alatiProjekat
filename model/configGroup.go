@@ -1,9 +1,9 @@
 package model
 
 type ConfigGroup struct {
-	Name       string   `json:"name"`
-	Version    int      `json:"version"`
-	ConfigList []Config `json:"configList"`
+	Name         string         `json:"name"`
+	Version      int            `json:"version"`
+	ConfigInList []ConfigInList `json:"configInList"`
 }
 
 type ConfigGroupRepository interface {

@@ -4,6 +4,8 @@ import (
 	"ProjectModule/model"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 type ConfigGroupInMemRepository struct {
@@ -38,4 +40,31 @@ func (c *ConfigGroupInMemRepository) DeleteGroup(name string, version int) error
 	}
 	delete(c.configGroups, key)
 	return nil
+}
+
+func (c *ConfigInMemRepository) NewConfigGroupFromLiteral(literal string) (model.ConfigGroup, error) {
+	parts := strings.Fields(literal)
+	if len(parts) < 3 {
+		return model.ConfigGroup{}, errors.New("invalid literal format")
+	}
+
+	version, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return model.ConfigGroup{}, errors.New("invalid version format")
+	}
+
+	configInLists := make(map[string]string)
+	for i := 2; i < len(parts); i++ {
+		configInList := strings.Split(parts[i], "=")
+		if len(configInList) != 2 {
+			return model.ConfigGroup{}, errors.New("invalid parameter format")
+		}
+		configInLists[configInList[0]] = configInList[1]
+	}
+
+	return model.ConfigGroup{
+		Name:         parts[0],
+		Version:      version,
+		ConfigInList: configInLists,
+	}, nil
 }

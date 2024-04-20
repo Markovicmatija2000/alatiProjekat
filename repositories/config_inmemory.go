@@ -8,6 +8,15 @@ import (
 	"strings"
 )
 
+/*
+1. POST /groups
+2. POST /groups/{naziv}/{verzija}/configs
+3. GET /groups/{naziv}/{verzija}/configs/{filter}
+4.DELETE /groups/{naziv}/{verzija}/configs/{filter}
+filter => nl1:01;nl2:02...
+
+putanje koje je dala na casu
+*/
 type ConfigInMemRepository struct {
 	configs map[string]model.Config
 }
