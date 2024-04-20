@@ -42,7 +42,7 @@ func (c *ConfigGroupInMemRepository) DeleteGroup(name string, version int) error
 	return nil
 }
 
-func (c *ConfigInMemRepository) NewConfigGroupFromLiteral(literal string) (model.ConfigGroup, error) {
+/*func (c *ConfigInMemRepository) NewConfigGroupFromLiteral(literal string) (model.ConfigGroup, error) {
 	parts := strings.Fields(literal)
 	if len(parts) < 3 {
 		return model.ConfigGroup{}, errors.New("invalid literal format")
@@ -67,4 +67,32 @@ func (c *ConfigInMemRepository) NewConfigGroupFromLiteral(literal string) (model
 		Version:      version,
 		ConfigInList: configInLists,
 	}, nil
+}*/
+
+func (r *ConfigGroupInMemRepository) ParseConfigData(data []string) (model.ConfigGroup, error) {
+	var configGroup model.ConfigGroup
+
+	configGroup.Name = data[0]
+	version, err := strconv.Atoi(data[1])
+	if err != nil {
+		return model.ConfigGroup{}, errors.New("invalid version format")
+	}
+	configGroup.Version = version
+
+	for i := 2; i < len(data); i++ {
+		configInList := strings.Split(data[i], "=")
+		if len(configInList) != 2 {
+			return model.ConfigGroup{}, errors.New("invalid parameter format")
+		}
+
+		config := model.ConfigInList{
+			Name: configInList[0],
+			Params: map[string]string{
+				"value": configInList[1], // Assuming your parameter is named "value"
+			},
+		}
+		configGroup.ConfigInList = append(configGroup.ConfigInList, config)
+	}
+
+	return configGroup, nil
 }
