@@ -1,11 +1,15 @@
 package main
 
 import (
+	"ProjectModule/handlers"
 	"ProjectModule/model"
 	"ProjectModule/repositories"
 	"ProjectModule/services"
 	"encoding/json"
 	"fmt"
+	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 func main() {
@@ -78,4 +82,11 @@ func main() {
 	fmt.Println(string(jsonData))
 
 	fmt.Println(string(jsonData1))
+	handler := handlers.NewConfigHandler(service)
+
+	router := mux.NewRouter()
+
+	router.HandleFunc("/configs/{name}/{version}", handler.Get).Methods("GET")
+
+	http.ListenAndServe("0.0.0.0:8000", router)
 }
