@@ -2,7 +2,6 @@ package services
 
 import (
 	"ProjectModule/model"
-	"fmt"
 )
 
 type ConfigService struct {
@@ -15,16 +14,14 @@ func NewConfigService(repo model.ConfigRepository) ConfigService {
 	}
 }
 
-func (s ConfigService) Hello() {
-	fmt.Println("Pozdrav :)")
-}
-
-
-
 func (s ConfigService) Add(config model.Config) {
 	s.repo.Add(config)
 }
 
 func (s ConfigService) Get(name string, version int) (model.Config, error) {
 	return s.repo.Get(name, version)
+}
+
+func (s ConfigService) Delete(name string, version int) error {
+	return s.repo.Delete(name, version)
 }
