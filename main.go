@@ -28,7 +28,7 @@ func main() {
 	repo2 := repositories.NewConfigGroupInMemRepository()
 	service := services.NewConfigService(repoS)
 	groupService := services.NewConfigGroupService(repo2)
-	simulateOperations(service, groupService, repoS, repo2)
+	simulateOperations(service, repoS)
 
 	// Definišemo router i handlere
 	configHandler := handlers.NewConfigHandler(service)
@@ -44,18 +44,18 @@ func main() {
 	router.HandleFunc("/configgroups/{name}/{version}", configGroupHandler.Get).Methods("GET")
 	router.HandleFunc("/configgroups", configGroupHandler.Add).Methods("POST")
 	router.HandleFunc("/configgroups/{name}/{version}", configGroupHandler.Delete).Methods("DELETE")
-
-	http.ListenAndServe("0.0.0.0:8000", router)
+	router.HandleFunc("/configGroups/{nameG}/{versionG}/config/{index}", configGroupHandler.AddConfToGroup).Methods("PUT")
+	router.HandleFunc("/configGroups/{nameG}/{versionG}/{index}", configGroupHandler.RemoveConfFromGroup).Methods("PUT")
 
 	// Handler za /shutdown
 	router.HandleFunc("/shutdown", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println("Primljen zahtev za gasenje...")
+		fmt.Println("Primljen zahtev za gašenje...")
 
-		// Odgovor klijentu da je zahtev za gasenje primljen
+		// Odgovor klijentu da je zahtev za gašenje primljen
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Server će biti gasen...")
+		fmt.Fprintf(w, "Server će biti gašen...")
 
-		// Čekamo određeni vremenski period pre gasenja servera
+		// Čekamo određeni vremenski period pre gašenja servera
 		time.AfterFunc(shutdownTimer, func() {
 			// Šaljemo shutdown signal nakon isteka vremenskog perioda
 			shutdownChan <- os.Interrupt
@@ -70,30 +70,32 @@ func main() {
 	go func() {
 		fmt.Println("Pokretanje servera na", server.Addr)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			fmt.Println("Greska pri pokretanju servera:", err)
+			fmt.Println("Greška pri pokretanju servera:", err)
 			os.Exit(1)
 		}
 	}()
 
 	// Čekamo shutdown signal
 	<-shutdownChan
-	fmt.Println("Primljen shutdown signal. Gasenje aplikacije...")
+	fmt.Println("Primljen shutdown signal. Gašenje aplikacije...")
 
 	// Countdown sa tajmerom za graceful shutdown
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	// Gasenje servera
+	// Gašenje servera
 	if err := server.Shutdown(ctx); err != nil {
-		fmt.Println("Greska pri gasenju servera:", err)
+		fmt.Println("Greška pri gašenju servera:", err)
 		os.Exit(1)
 	}
 
-	fmt.Println("Gasenje servera uspesno.")
+	fmt.Println("Gašenje servera uspešno.")
 	os.Exit(0) // Izlaz iz aplikacije
 }
 
-func simulateOperations(service services.ConfigService, groupService services.ConfigGroupService, repoS model.ConfigRepository, repo2 model.ConfigGroupRepository) {
+func simulateOperations(service services.ConfigService, repoS model.ConfigRepository) {
+	//	(groupService services.ConfigGroupService,  repo2 model.ConfigGroupRepository)
+
 	params := make(map[string]string)
 	params["username"] = "pera"
 	params["port"] = "5431"
@@ -107,29 +109,12 @@ func simulateOperations(service services.ConfigService, groupService services.Co
 	service.Add(config2)
 	service.Add(config)
 
-	configData := []string{
+	/*configData := []string{
 		"GroupA",        // Naziv grupe
 		"1",             // Verzija grupe
 		"param1=value1", // Konfiguracioni parametar 1
 		"param2=value2", // Konfiguracioni parametar 2
 	}
-
-	newConfigGroup := model.ConfigGroup{
-		Name:    "TestGroup",
-		Version: 1,
-		ConfigInList: []model.ConfigInList{
-			{
-				Name: "Config1",
-				Params: map[string]string{
-					"param1": "value1",
-					"param2": "value2",
-				},
-			},
-			// Add more ConfigInList objects as needed
-		},
-	}
-
-	groupService.AddGroup(newConfigGroup)
 
 	configGroup, _ := repo2.ParseConfigData(configData)
 	fmt.Println("Naziv grupe:", configGroup.Name)
@@ -137,7 +122,7 @@ func simulateOperations(service services.ConfigService, groupService services.Co
 	fmt.Println("Konfiguracioni parametri:")
 	for _, config := range configGroup.ConfigInList {
 		fmt.Printf("- Naziv: %s, Vrednost: %s\n", config.Name, config.Params["value"])
-	}
+	}*/
 
 	retrievedConfig1, _ := service.Get("Ime", 23)
 	retrievedConfig, _ := service.Get("db_config", 2)

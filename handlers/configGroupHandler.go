@@ -11,13 +11,26 @@ import (
 )
 
 type ConfigGroupHandler struct {
-	service services.ConfigGroupService
+	groupService        services.ConfigGroupService
+	configInListService services.ConfigInListService
 }
 
 func NewConfigGroupHandler(service services.ConfigGroupService) ConfigGroupHandler {
 	return ConfigGroupHandler{
-		service: service,
+		groupService: service,
 	}
+}
+
+func renderJSON(w http.ResponseWriter, v interface{}) {
+	js, err := json.Marshal(v)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(js)
 }
 
 // GET /configgroups/{name}/{version}
@@ -32,7 +45,7 @@ func (c ConfigGroupHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the service method to get the config group
-	configGroup, err := c.service.GetGroup(name, version)
+	configGroup, err := c.groupService.GetGroup(name, version)
 	if err != nil {
 		http.Error(w, "Config group not found", http.StatusNotFound)
 		return
@@ -62,7 +75,7 @@ func (c ConfigGroupHandler) Add(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Call the AddGroup method of the service to add the new config group
-	c.service.AddGroup(configGroup)
+	c.groupService.AddGroup(configGroup)
 
 	// Respond with success status
 	w.WriteHeader(http.StatusCreated)
@@ -80,14 +93,14 @@ func (c ConfigGroupHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Check if the config group exists
-	_, err = c.service.GetGroup(name, version)
+	_, err = c.groupService.GetGroup(name, version)
 	if err != nil {
 		http.Error(w, "Config group not found", http.StatusNotFound)
 		return
 	}
 
 	// Call the DeleteGroup method of the service to delete the config group
-	err = c.service.DeleteGroup(name, version)
+	err = c.groupService.DeleteGroup(name, version)
 	if err != nil {
 		http.Error(w, "Failed to delete config group", http.StatusInternalServerError)
 		return
@@ -95,4 +108,54 @@ func (c ConfigGroupHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	// Respond with success status
 	w.WriteHeader(http.StatusOK)
+}
+
+func (c ConfigGroupHandler) AddConfToGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	nameG := vars["nameG"]
+	versionGStr := vars["versionG"]
+	nameC := vars["index"]
+
+	versionG, err := strconv.Atoi(versionGStr)
+	if err != nil {
+		http.Error(w, "Invalid version", http.StatusBadRequest)
+		return
+	}
+
+	group, _ := c.groupService.GetGroup(nameG, versionG)
+	conf, _ := c.configInListService.Get(nameC)
+
+	err = c.groupService.AddConfigToGroup(group, conf)
+	if err != nil {
+		return
+	}
+
+	renderJSON(w, "success Put")
+}
+
+func (c ConfigGroupHandler) RemoveConfFromGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	nameG := vars["nameG"]
+	versionGStr := vars["versionG"]
+	indexStr := vars["index"]
+
+	versionG, err := strconv.Atoi(versionGStr)
+	if err != nil {
+		http.Error(w, "Invalid version", http.StatusBadRequest)
+		return
+	}
+
+	index, err := strconv.Atoi(indexStr)
+	if err != nil {
+		http.Error(w, "Invalid index", http.StatusBadRequest)
+		return
+	}
+
+	group, _ := c.groupService.GetGroup(nameG, versionG)
+	err = c.groupService.RemoveConfigFromGroup(group, index)
+	if err != nil {
+		return
+	}
+
+	renderJSON(w, "success Put")
 }

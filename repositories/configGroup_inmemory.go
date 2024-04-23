@@ -4,8 +4,6 @@ import (
 	"ProjectModule/model"
 	"errors"
 	"fmt"
-	"strconv"
-	"strings"
 )
 
 type ConfigGroupInMemRepository struct {
@@ -42,6 +40,19 @@ func (c *ConfigGroupInMemRepository) DeleteGroup(name string, version int) error
 	return nil
 }
 
+func (c *ConfigGroupInMemRepository) AddConfigToGroup(group model.ConfigGroup, config model.ConfigInList) error {
+	group.ConfigInList = append(group.ConfigInList, config)
+	return nil
+}
+
+func (c *ConfigGroupInMemRepository) RemoveConfigFromGroup(group model.ConfigGroup, index int) error {
+	if index < 0 || index >= len(group.ConfigInList) {
+		return errors.New("index out of range")
+	}
+	group.ConfigInList = append(group.ConfigInList[:index], group.ConfigInList[index+1:]...)
+	return nil
+}
+
 /*func (c *ConfigInMemRepository) NewConfigGroupFromLiteral(literal string) (model.ConfigGroup, error) {
 	parts := strings.Fields(literal)
 	if len(parts) < 3 {
@@ -67,7 +78,7 @@ func (c *ConfigGroupInMemRepository) DeleteGroup(name string, version int) error
 		Version:      version,
 		ConfigInList: configInLists,
 	}, nil
-}*/
+}
 
 func (r *ConfigGroupInMemRepository) ParseConfigData(data []string) (model.ConfigGroup, error) {
 	var configGroup model.ConfigGroup
@@ -95,4 +106,4 @@ func (r *ConfigGroupInMemRepository) ParseConfigData(data []string) (model.Confi
 	}
 
 	return configGroup, nil
-}
+}*/
