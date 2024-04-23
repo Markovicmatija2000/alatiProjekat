@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -31,6 +32,7 @@ func (c ConfigHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	time.Sleep(3 * time.Second)
 	// pozovi servis metodu
 	config, err := c.service.Get(name, versionInt)
 	if err != nil {
