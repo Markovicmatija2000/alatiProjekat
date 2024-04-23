@@ -1,0 +1,166 @@
+{
+    "info": {
+        "_postman_id": "191743b6-0c85-44e6-aa1a-f90033786022",
+        "name": "AlatiKolekcija",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "description": ""
+    },
+    "item": [
+        {
+            "name": "GET for Config",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "localhost:8000/configs/TestConfig/1",
+                    "path": [
+                        "configs",
+                        "TestConfig",
+                        "1"
+                    ],
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                }
+            }
+        },
+        {
+            "name": "POST for Config",
+            "request": {
+                "method": "POST",
+                "url": {
+                    "raw": "localhost:8000/configs",
+                    "path": [
+                        "configs"
+                    ],
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                },
+                "body": {
+                    "mode": "raw",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    },
+                    "raw": "{\n  \"name\": \"TestConfig\",\n  \"version\": 1,\n  \"params\": {\n    \"params\": \"params1\",\n    \"params2\": \"params2\"\n  }\n}"
+                }
+            }
+        },
+        {
+            "name": "DELETE for Config",
+            "request": {
+                "method": "DELETE",
+                "url": {
+                    "raw": "localhost:8000/configs/TestConfig/1",
+                    "path": [
+                        "configs",
+                        "TestConfig",
+                        "1"
+                    ],
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                }
+            }
+        },
+        {
+            "name": "POST for ConfigGroup",
+            "request": {
+                "method": "POST",
+                "url": {
+                    "raw": "localhost:8000/configgroups",
+                    "path": [
+                        "configgroups"
+                    ],
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                },
+                "body": {
+                    "mode": "raw",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    },
+                    "raw": "{\n  \"name\": \"TestGroup1\",\n  \"version\": 1,\n  \"configInList\": [\n    {\n      \"name\": \"Config1\",\n      \"params\": {\n        \"param1\": \"value1\",\n        \"param2\": \"value2\"\n      }\n    }\n  ]\n}\n\n"
+                }
+            }
+        },
+        {
+            "name": "GET for ConfigGroup",
+            "request": {
+                "method": "GET",
+                "url": {
+                    "raw": "localhost:8000/configgroups/TestGroup1/1",
+                    "path": [
+                        "configgroups",
+                        "TestGroup1",
+                        "1"
+                    ],
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                }
+            }
+        },
+        {
+            "name": "DELETE for ConfigGroup",
+            "request": {
+                "method": "DELETE",
+                "url": {
+                    "raw": "localhost:8000/configs/TestConfig/1",
+                    "path": [
+                        "configs",
+                        "TestConfig",
+                        "1"
+                    ],
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                }
+            }
+        },
+        {
+            "name": "Shutdown",
+            "request": {
+                "method": "POST",
+                "url": {
+                    "raw": "localhost:8000/shutdown",
+                    "path": [
+                        "shutdown"
+                    ],
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                }
+            }
+        },
+        {
+            "name": "PUT Removing for ConfigInList in ConfigGroup",
+            "request": {
+                "method": "DELETE",
+                "url": {
+                    "raw": "localhost:8000/configs/TestConfig/1",
+                    "path": [
+                        "configs",
+                        "TestConfig",
+                        "1"
+                    ],
+                    "host": [
+                        "localhost"
+                    ],
+                    "port": "8000"
+                }
+            }
+        }
+    ]
+}
