@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"golang.org/x/time/rate"
 )
 
 var shutdownTimer = 5 * time.Second
@@ -35,15 +36,27 @@ func main() {
 	configGroupHandler := handlers.NewConfigGroupHandler(groupService)
 
 	router := mux.NewRouter()
-
-	router.HandleFunc("/configs/{name}/{version}", configHandler.Get).Methods("GET")
-	router.HandleFunc("/configs", configHandler.Add).Methods("POST")
-	router.HandleFunc("/configs/{name}/{version}", configHandler.Delete).Methods("DELETE")
+	limiter := rate.NewLimiter(0.167, 1)
+	router.HandleFunc("/configs/{name}/{version}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RateLimit(limiter, http.HandlerFunc(configHandler.Get)).ServeHTTP(w, r)
+	}).Methods("GET")
+	router.HandleFunc("/configs", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RateLimit(limiter, http.HandlerFunc(configHandler.Add)).ServeHTTP(w, r)
+	}).Methods("POST")
+	router.HandleFunc("/configs/{name}/{version}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RateLimit(limiter, http.HandlerFunc(configHandler.Delete)).ServeHTTP(w, r)
+	}).Methods("DELETE")
 
 	// ConfigGroup routes
-	router.HandleFunc("/configgroups/{name}/{version}", configGroupHandler.Get).Methods("GET")
-	router.HandleFunc("/configgroups", configGroupHandler.Add).Methods("POST")
-	router.HandleFunc("/configgroups/{name}/{version}", configGroupHandler.Delete).Methods("DELETE")
+	router.HandleFunc("/configgroups/{name}/{version}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RateLimit(limiter, http.HandlerFunc(configGroupHandler.Get)).ServeHTTP(w, r)
+	}).Methods("GET")
+	router.HandleFunc("/configgroups", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RateLimit(limiter, http.HandlerFunc(configGroupHandler.Add)).ServeHTTP(w, r)
+	}).Methods("POST")
+	router.HandleFunc("/configgroups/{name}/{version}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RateLimit(limiter, http.HandlerFunc(configGroupHandler.Delete)).ServeHTTP(w, r)
+	}).Methods("DELETE")
 	router.HandleFunc("/configGroups/{nameG}/{versionG}/config/{index}", configGroupHandler.AddConfToGroup).Methods("PUT")
 	router.HandleFunc("/configGroups/{nameG}/{versionG}/{index}", configGroupHandler.RemoveConfFromGroup).Methods("PUT")
 
@@ -61,6 +74,8 @@ func main() {
 			shutdownChan <- os.Interrupt
 		})
 	}).Methods("POST")
+
+	//http.Handle("/", handlers.RateLimit(limiter,router.ServeHTTP))
 
 	server := &http.Server{
 		Addr:    "0.0.0.0:8000",
