@@ -3,7 +3,12 @@ module ProjectModule
 go 1.22
 
 //oznacavamo tacno koju verziju bi trebao da koristi
-toolchain go1.22.1
+
+//toolchain go1.22.1 
+//ovo je iskomentarisano zato sto pravi probleme sa dockerom
+//trebalo bi da ce on sam izabrat dobru verziju toolchaina
+//valjda
+
 
 require (
 	github.com/gorilla/mux v1.8.1
