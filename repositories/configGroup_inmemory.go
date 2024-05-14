@@ -70,19 +70,43 @@ func (c *ConfigGroupInMemRepository) GetConfigInListByLabels(name string, versio
 		return nil, err
 	}
 
+	// Print labels for debugging
+	fmt.Println("Provided labels:", labels)
+
 	// Initialize a slice to store matching configInList
 	var matchingConfigInList []model.ConfigInList
 
 	// Iterate over the configInList and add those that match the provided labels
+LabelLoop:
 	for _, configInList := range configGroup.ConfigInList {
-		if reflect.DeepEqual(configInList.Labels, labels) {
-			matchingConfigInList = append(matchingConfigInList, configInList)
+
+		fmt.Println("ConfigInList labels:", configInList.Labels)
+
+		// Check if the number of labels in the configInList matches the number of provided labels
+		if len(configInList.Labels) != len(labels) {
+			continue
 		}
+
+		// Iterate over the provided labels and compare them with the labels in the configInList
+		for _, providedLabel := range labels {
+			found := false
+			for labelName, labelValue := range configInList.Labels {
+				if providedLabel.Name == labelName && providedLabel.Params["value"] == labelValue {
+					found = true
+					break
+				}
+			}
+			if !found {
+				continue LabelLoop
+			}
+		}
+
+		// If all labels match, add the configInList to matchingConfigInList
+		matchingConfigInList = append(matchingConfigInList, configInList)
 	}
 
-	// If no configInList matched the provided labels, return an error
 	if len(matchingConfigInList) == 0 {
-		return nil, errors.New("configInList with specified labels not found")
+		return nil, fmt.Errorf("configInList with specified labels not found for %s version %d", name, version)
 	}
 
 	return matchingConfigInList, nil

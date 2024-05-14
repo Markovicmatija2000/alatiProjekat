@@ -147,7 +147,6 @@ func (c ConfigGroupHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Respond with success status
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -174,21 +173,24 @@ func (c ConfigGroupHandler) GetConfigInListByLabels(w http.ResponseWriter, r *ht
 		labels = append(labels, model.ConfigInList{Name: labelParts[0], Params: map[string]string{"value": labelParts[1]}})
 	}
 
-	// Call the service method to get the config in list by labels
+	// Calling the service method to get the config in list by labels
+
 	configInLists, err := c.groupService.GetConfigInListByLabels(name, version, labels)
 	if err != nil {
 		http.Error(w, "Failed to get config in list by labels", http.StatusInternalServerError)
 		return
 	}
 
-	// Marshal the config in lists to JSON
+	// Marshaling the config in lists to JSON
+
 	resp, err := json.Marshal(configInLists)
 	if err != nil {
 		http.Error(w, "Failed to marshal config in lists", http.StatusInternalServerError)
 		return
 	}
 
-	// Set response headers and write response
+	// Seting response headers and write response
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(resp)
 }
