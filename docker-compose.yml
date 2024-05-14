@@ -1,0 +1,24 @@
+version: "3"
+
+services:
+  consul:
+    image: consul:1.10.3
+    ports:
+      - "8500:8500" # Consul UI port
+    volumes:
+      - consul_data:/consul/data # Persist Consul data
+
+  app:
+    build: .
+    ports:
+      - "8000:8000" # Port na kom aplikacija slusa komande
+    depends_on:
+      - consul
+    environment:
+      - CONSUL_HTTP_ADDR=consul:8500 # adresa consula
+    volumes:
+      - app_data:/app/data # da ostaju podatci aplikacije
+
+volumes:
+  consul_data:
+  app_data:
