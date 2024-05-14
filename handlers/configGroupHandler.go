@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -110,52 +111,118 @@ func (c ConfigGroupHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func (c ConfigGroupHandler) AddConfToGroup(w http.ResponseWriter, r *http.Request) {
+// PUT /configgroups/{name}/{version}
+func (c ConfigGroupHandler) Update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	nameG := vars["nameG"]
-	versionGStr := vars["versionG"]
-	nameC := vars["index"]
-
-	versionG, err := strconv.Atoi(versionGStr)
+	name := vars["name"]
+	versionStr := vars["version"]
+	version, err := strconv.Atoi(versionStr)
 	if err != nil {
-		http.Error(w, "Invalid version", http.StatusBadRequest)
+		http.Error(w, "Invalid version format", http.StatusBadRequest)
 		return
 	}
 
-	group, _ := c.groupService.GetGroup(nameG, versionG)
-	conf, _ := c.configInListService.Get(nameC)
-
-	err = c.groupService.AddConfigToGroup(group, conf)
+	// Decode the JSON payload into the ConfigInList struct
+	var configInList model.ConfigInList
+	err = json.NewDecoder(r.Body).Decode(&configInList)
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	renderJSON(w, "success Put")
+	// Get the existing config group
+	existingGroup, err := c.groupService.GetGroup(name, version)
+	if err != nil {
+		http.Error(w, "Config group not found", http.StatusNotFound)
+		return
+	}
+
+	// Add the new configInList to the existing group
+	existingGroup.ConfigInList = append(existingGroup.ConfigInList, configInList)
+
+	// Call the UpdateGroup method of the service to update the config group
+	err = c.groupService.UpdateGroup(existingGroup)
+	if err != nil {
+		http.Error(w, "Failed to update config group", http.StatusInternalServerError)
+		return
+	}
+
+	// Respond with success status
+	w.WriteHeader(http.StatusOK)
 }
 
-func (c ConfigGroupHandler) RemoveConfFromGroup(w http.ResponseWriter, r *http.Request) {
+// GET /configgroups/{name}/{version}/{labels}
+func (c ConfigGroupHandler) GetConfigInListByLabels(w http.ResponseWriter, r *http.Request) {
+	// Parse the request URL parameters
 	vars := mux.Vars(r)
-	nameG := vars["nameG"]
-	versionGStr := vars["versionG"]
-	indexStr := vars["index"]
-
-	versionG, err := strconv.Atoi(versionGStr)
+	name := vars["name"]
+	versionStr := vars["version"]
+	version, err := strconv.Atoi(versionStr)
 	if err != nil {
-		http.Error(w, "Invalid version", http.StatusBadRequest)
+		http.Error(w, "Invalid version format", http.StatusBadRequest)
+		return
+	}
+	labelsStr := vars["labels"]
+	labelPairs := strings.Split(labelsStr, ";")
+	labels := make([]model.ConfigInList, 0, len(labelPairs))
+	for _, pair := range labelPairs {
+		labelParts := strings.Split(pair, ":")
+		if len(labelParts) != 2 {
+			http.Error(w, "Invalid label format", http.StatusBadRequest)
+			return
+		}
+		labels = append(labels, model.ConfigInList{Name: labelParts[0], Params: map[string]string{"value": labelParts[1]}})
+	}
+
+	// Call the service method to get the config in list by labels
+	configInLists, err := c.groupService.GetConfigInListByLabels(name, version, labels)
+	if err != nil {
+		http.Error(w, "Failed to get config in list by labels", http.StatusInternalServerError)
 		return
 	}
 
-	index, err := strconv.Atoi(indexStr)
+	// Marshal the config in lists to JSON
+	resp, err := json.Marshal(configInLists)
 	if err != nil {
-		http.Error(w, "Invalid index", http.StatusBadRequest)
+		http.Error(w, "Failed to marshal config in lists", http.StatusInternalServerError)
 		return
 	}
 
-	group, _ := c.groupService.GetGroup(nameG, versionG)
-	err = c.groupService.RemoveConfigFromGroup(group, index)
+	// Set response headers and write response
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(resp)
+}
+
+// DELETE /configgroups/{name}/{version}/{labels}
+func (c ConfigGroupHandler) DeleteConfigInListByLabels(w http.ResponseWriter, r *http.Request) {
+	// Parse the request URL parameters
+	vars := mux.Vars(r)
+	name := vars["name"]
+	versionStr := vars["version"]
+	version, err := strconv.Atoi(versionStr)
 	if err != nil {
+		http.Error(w, "Invalid version format", http.StatusBadRequest)
+		return
+	}
+	labelsStr := vars["labels"]
+	labelPairs := strings.Split(labelsStr, ";")
+	labels := make([]model.ConfigInList, 0, len(labelPairs))
+	for _, pair := range labelPairs {
+		labelParts := strings.Split(pair, ":")
+		if len(labelParts) != 2 {
+			http.Error(w, "Invalid label format", http.StatusBadRequest)
+			return
+		}
+		labels = append(labels, model.ConfigInList{Name: labelParts[0], Params: map[string]string{"value": labelParts[1]}})
+	}
+
+	// Call the service method to delete the config in list by labels
+	err = c.groupService.DeleteConfigInListByLabels(name, version, labels)
+	if err != nil {
+		http.Error(w, "Failed to delete config in list by labels", http.StatusInternalServerError)
 		return
 	}
 
-	renderJSON(w, "success Put")
+	// Respond with success status
+	w.WriteHeader(http.StatusOK)
 }

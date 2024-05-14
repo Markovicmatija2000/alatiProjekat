@@ -57,8 +57,18 @@ func main() {
 	router.HandleFunc("/configgroups/{name}/{version}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.RateLimit(limiter, http.HandlerFunc(configGroupHandler.Delete)).ServeHTTP(w, r)
 	}).Methods("DELETE")
-	router.HandleFunc("/configGroups/{nameG}/{versionG}/config/{index}", configGroupHandler.AddConfToGroup).Methods("PUT")
-	router.HandleFunc("/configGroups/{nameG}/{versionG}/{index}", configGroupHandler.RemoveConfFromGroup).Methods("PUT")
+
+	router.HandleFunc("/configgroups/{name}/{version}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RateLimit(limiter, http.HandlerFunc(configGroupHandler.Update)).ServeHTTP(w, r)
+	}).Methods("PUT")
+
+	router.HandleFunc("/configgroups/{name}/{version}/{labels}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RateLimit(limiter, http.HandlerFunc(configGroupHandler.GetConfigInListByLabels)).ServeHTTP(w, r)
+	}).Methods("GET")
+
+	router.HandleFunc("/configgroups/{name}/{version}/{labels}", func(w http.ResponseWriter, r *http.Request) {
+		handlers.RateLimit(limiter, http.HandlerFunc(configGroupHandler.DeleteConfigInListByLabels)).ServeHTTP(w, r)
+	}).Methods("DELETE")
 
 	// Handler za /shutdown
 	router.HandleFunc("/shutdown", func(w http.ResponseWriter, r *http.Request) {

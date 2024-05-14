@@ -11,8 +11,8 @@ type ConfigGroupRepository interface {
 	GetGroup(name string, version int) (ConfigGroup, error)
 	DeleteGroup(name string, version int) error
 
-	AddConfigToGroup(group ConfigGroup, config ConfigInList) error
-	RemoveConfigFromGroup(group ConfigGroup, key int) error
+	GetConfigInListByLabels(name string, version int, labels []ConfigInList) ([]ConfigInList, error)
+	DeleteConfigInListByLabels(name string, version int, labels []ConfigInList) error
 
 	//ParseConfigData(data []string) (ConfigGroup, error)
 }

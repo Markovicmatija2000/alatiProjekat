@@ -4,13 +4,14 @@ import (
 	"ProjectModule/model"
 	"errors"
 	"fmt"
+	"reflect"
 )
 
 type ConfigGroupInMemRepository struct {
 	configGroups map[string]model.ConfigGroup
 }
 
-func NewConfigGroupInMemRepository() model.ConfigGroupRepository {
+func NewConfigGroupInMemRepository() *ConfigGroupInMemRepository {
 	return &ConfigGroupInMemRepository{
 		configGroups: make(map[string]model.ConfigGroup),
 	}
@@ -40,70 +41,49 @@ func (c *ConfigGroupInMemRepository) DeleteGroup(name string, version int) error
 	return nil
 }
 
-func (c *ConfigGroupInMemRepository) AddConfigToGroup(group model.ConfigGroup, config model.ConfigInList) error {
-	group.ConfigInList = append(group.ConfigInList, config)
+func (c *ConfigGroupInMemRepository) DeleteConfigInListByLabels(name string, version int, labels []model.ConfigInList) error {
+	// Get the configGroup from the repository
+	configGroup, err := c.GetGroup(name, version)
+	if err != nil {
+		return err
+	}
+
+	// Iterate over the configInList and remove those that match the provided labels
+	var updatedConfigInList []model.ConfigInList
+	for _, configInList := range configGroup.ConfigInList {
+		if !reflect.DeepEqual(configInList.Labels, labels) {
+			updatedConfigInList = append(updatedConfigInList, configInList)
+		}
+	}
+
+	// Update the configGroup in the repository
+	configGroup.ConfigInList = updatedConfigInList
+	c.AddGroup(configGroup)
+
 	return nil
 }
 
-func (c *ConfigGroupInMemRepository) RemoveConfigFromGroup(group model.ConfigGroup, index int) error {
-	if index < 0 || index >= len(group.ConfigInList) {
-		return errors.New("index out of range")
-	}
-	group.ConfigInList = append(group.ConfigInList[:index], group.ConfigInList[index+1:]...)
-	return nil
-}
-
-/*func (c *ConfigInMemRepository) NewConfigGroupFromLiteral(literal string) (model.ConfigGroup, error) {
-	parts := strings.Fields(literal)
-	if len(parts) < 3 {
-		return model.ConfigGroup{}, errors.New("invalid literal format")
-	}
-
-	version, err := strconv.Atoi(parts[1])
+func (c *ConfigGroupInMemRepository) GetConfigInListByLabels(name string, version int, labels []model.ConfigInList) ([]model.ConfigInList, error) {
+	// Get the configGroup from the repository
+	configGroup, err := c.GetGroup(name, version)
 	if err != nil {
-		return model.ConfigGroup{}, errors.New("invalid version format")
+		return nil, err
 	}
 
-	configInLists := make(map[string]string)
-	for i := 2; i < len(parts); i++ {
-		configInList := strings.Split(parts[i], "=")
-		if len(configInList) != 2 {
-			return model.ConfigGroup{}, errors.New("invalid parameter format")
+	// Initialize a slice to store matching configInList
+	var matchingConfigInList []model.ConfigInList
+
+	// Iterate over the configInList and add those that match the provided labels
+	for _, configInList := range configGroup.ConfigInList {
+		if reflect.DeepEqual(configInList.Labels, labels) {
+			matchingConfigInList = append(matchingConfigInList, configInList)
 		}
-		configInLists[configInList[0]] = configInList[1]
 	}
 
-	return model.ConfigGroup{
-		Name:         parts[0],
-		Version:      version,
-		ConfigInList: configInLists,
-	}, nil
+	// If no configInList matched the provided labels, return an error
+	if len(matchingConfigInList) == 0 {
+		return nil, errors.New("configInList with specified labels not found")
+	}
+
+	return matchingConfigInList, nil
 }
-
-func (r *ConfigGroupInMemRepository) ParseConfigData(data []string) (model.ConfigGroup, error) {
-	var configGroup model.ConfigGroup
-
-	configGroup.Name = data[0]
-	version, err := strconv.Atoi(data[1])
-	if err != nil {
-		return model.ConfigGroup{}, errors.New("invalid version format")
-	}
-	configGroup.Version = version
-
-	for i := 2; i < len(data); i++ {
-		configInList := strings.Split(data[i], "=")
-		if len(configInList) != 2 {
-			return model.ConfigGroup{}, errors.New("invalid parameter format")
-		}
-
-		config := model.ConfigInList{
-			Name: configInList[0],
-			Params: map[string]string{
-				"value": configInList[1], // Assuming your parameter is named "value"
-			},
-		}
-		configGroup.ConfigInList = append(configGroup.ConfigInList, config)
-	}
-
-	return configGroup, nil
-}*/

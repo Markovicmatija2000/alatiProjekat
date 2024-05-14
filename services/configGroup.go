@@ -1,6 +1,9 @@
 package services
 
-import "ProjectModule/model"
+import (
+	"ProjectModule/model"
+	"errors"
+)
 
 type ConfigGroupService struct {
 	repo model.ConfigGroupRepository
@@ -24,18 +27,23 @@ func (s ConfigGroupService) DeleteGroup(name string, version int) error {
 	return s.repo.DeleteGroup(name, version)
 }
 
-func (s ConfigGroupService) AddConfigToGroup(group model.ConfigGroup, config model.ConfigInList) error {
-	err := s.repo.AddConfigToGroup(group, config)
+func (s ConfigGroupService) UpdateGroup(configGroup model.ConfigGroup) error {
+	// Check if the config group exists
+	_, err := s.repo.GetGroup(configGroup.Name, configGroup.Version)
 	if err != nil {
-		return err
+		return errors.New("config group not found")
 	}
+
+	// Call the AddGroup method of the repository to update the config group
+	s.repo.AddGroup(configGroup)
+
 	return nil
 }
 
-func (s ConfigGroupService) RemoveConfigFromGroup(group model.ConfigGroup, key int) error {
-	err := s.repo.RemoveConfigFromGroup(group, key)
-	if err != nil {
-		return err
-	}
-	return nil
+func (s ConfigGroupService) DeleteConfigInListByLabels(name string, version int, labels []model.ConfigInList) error {
+	return s.repo.DeleteConfigInListByLabels(name, version, labels)
+}
+
+func (s ConfigGroupService) GetConfigInListByLabels(name string, version int, labels []model.ConfigInList) ([]model.ConfigInList, error) {
+	return s.repo.GetConfigInListByLabels(name, version, labels)
 }

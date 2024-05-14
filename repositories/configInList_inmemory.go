@@ -55,5 +55,6 @@ func (c *ConfigInListInMemRepository) NewConfigFromLiteral(literal string) (mode
 	return model.ConfigInList{
 		Name:   parts[0],
 		Params: params,
+		Labels: make(map[string]string),
 	}, nil
 }
