@@ -6,10 +6,8 @@ type Config struct {
 	Params  map[string]string `json:"params"`
 }
 
-// TODO: Dodati metode
-
 type ConfigRepository interface {
-	Add(config Config)
+	Add(config Config) error
 	Get(name string, version int) (Config, error)
 	Delete(name string, version int) error
 	NewConfigFromLiteral(literal string) (Config, error)

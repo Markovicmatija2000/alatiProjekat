@@ -25,7 +25,11 @@ func main() {
 	shutdownChan := make(chan os.Signal, 1)
 	signal.Notify(shutdownChan, os.Interrupt, syscall.SIGTERM)
 
-	repoS := repositories.NewConfigInMemRepository()
+	repoS, err := repositories.NewConfigConsulRepository()
+	if err != nil {
+    	fmt.Println("Error initializing Consul repository:", err)
+    	os.Exit(1)
+	}
 	repo2 := repositories.NewConfigGroupInMemRepository()
 	service := services.NewConfigService(repoS)
 	groupService := services.NewConfigGroupService(repo2)
