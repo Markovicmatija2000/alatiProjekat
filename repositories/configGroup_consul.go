@@ -25,21 +25,33 @@ func NewConfigGroupConsulRepository() (model.ConfigGroupRepository, error) {
 	return &ConfigGroupConsulRepository{client: client}, nil
 }
 
-func (r *ConfigGroupConsulRepository) AddGroup(configGroup model.ConfigGroup) {
+func (r *ConfigGroupConsulRepository) AddGroup(configGroup model.ConfigGroup) error {
     kv := r.client.KV()
+
+    // Marshal the configGroup into JSON
     p, err := json.Marshal(configGroup)
     if err != nil {
         // Handle the error, such as logging or other error handling mechanism
-        return
+        return err
     }
 
+    // Create a KVPair
     kvp := &api.KVPair{
         Key:   fmt.Sprintf("configgroup/%s/%d", configGroup.Name, configGroup.Version),
         Value: p,
     }
 
-    _, _ = kv.Put(kvp, nil) // Ignoring the error for simplicity
+    // Put the KVPair into Consul KV store
+    _, err = kv.Put(kvp, nil)
+    if err != nil {
+        // Handle the error, such as logging or other error handling mechanism
+        return err
+    }
+
+    return nil
 }
+
+
 
 
 func (r *ConfigGroupConsulRepository) GetGroup(name string, version int) (model.ConfigGroup, error) {
@@ -66,24 +78,23 @@ func (r *ConfigGroupConsulRepository) DeleteGroup(name string, version int) erro
 }
 
 func (r *ConfigGroupConsulRepository) GetConfigInListByLabels(name string, version int, labels []model.ConfigInList) ([]model.ConfigInList, error) {
-	// Get the configGroup from the repository
+
 	configGroup, err := r.GetGroup(name, version)
 	if err != nil {
 		return nil, err
 	}
 
-	// Initialize a slice to store matching configInList
 	var matchingConfigInList []model.ConfigInList
 
-	// Iterate over the configInList and add those that match the provided labels
+
 LabelLoop:
 	for _, configInList := range configGroup.ConfigInList {
-		// Check if the number of labels in the configInList matches the number of provided labels
+
 		if len(configInList.Labels) != len(labels) {
 			continue
 		}
 
-		// Iterate over the provided labels and compare them with the labels in the configInList
+
 		for _, providedLabel := range labels {
 			found := false
 			for labelName, labelValue := range configInList.Labels {
@@ -97,7 +108,7 @@ LabelLoop:
 			}
 		}
 
-		// If all labels match, add the configInList to matchingConfigInList
+
 		matchingConfigInList = append(matchingConfigInList, configInList)
 	}
 
@@ -110,6 +121,46 @@ LabelLoop:
 
 
 func (r *ConfigGroupConsulRepository) DeleteConfigInListByLabels(name string, version int, labels []model.ConfigInList) error {
-	// Implement this method
+	// Get the configGroup from the repository
+	configGroup, err := r.GetGroup(name, version)
+	if err != nil {
+		return err
+	}
+
+	// Iterate over the configInList and remove those that match the provided labels
+	var updatedConfigInList []model.ConfigInList
+LabelLoop:
+	for _, configInList := range configGroup.ConfigInList {
+
+		// Check if the number of labels in the configInList matches the number of provided labels
+		if len(configInList.Labels) != len(labels) {
+			updatedConfigInList = append(updatedConfigInList, configInList)
+			continue
+		}
+
+		// Iterate over the provided labels and compare them with the labels in the configInList
+		for _, providedLabel := range labels {
+			found := false
+			for labelName, labelValue := range configInList.Labels {
+				if providedLabel.Name == labelName && providedLabel.Params["value"] == labelValue {
+					found = true
+					break
+				}
+			}
+			if !found {
+				updatedConfigInList = append(updatedConfigInList, configInList)
+				continue LabelLoop
+			}
+		}
+	}
+
+	// Update the configGroup in the Consul repository
+	configGroup.ConfigInList = updatedConfigInList
+	err = r.AddGroup(configGroup)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
+

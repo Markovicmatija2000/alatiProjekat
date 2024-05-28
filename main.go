@@ -31,11 +31,13 @@ func main() {
     	os.Exit(1)
 	}
 
-	repo2, err := repositories.NewConfigGroupConsulRepository()
+	 repo2, err := repositories.NewConfigGroupConsulRepository()
 	if err != nil {
 		fmt.Println("Error initializing ConfigGroup Consul repository:", err)
 		os.Exit(1)
 	}
+	//repo2 := repositories.NewConfigGroupInMemRepository()
+
 	service := services.NewConfigService(repoS)
 	groupService := services.NewConfigGroupService(repo2)
 	simulateOperations(service, repoS)

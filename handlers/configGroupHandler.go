@@ -215,7 +215,8 @@ func (c ConfigGroupHandler) DeleteConfigInListByLabels(w http.ResponseWriter, r 
 			http.Error(w, "Invalid label format", http.StatusBadRequest)
 			return
 		}
-		labels = append(labels, model.ConfigInList{Name: labelParts[0], Params: map[string]string{"value": labelParts[1]}})
+		labels = append(labels, model.ConfigInList{Name: labelParts[0], Params: map[string]string{"value": labelParts[1]}, Labels: map[string]string{labelParts[0]: labelParts[1]}})
+
 	}
 
 	// Call the service method to delete the config in list by labels

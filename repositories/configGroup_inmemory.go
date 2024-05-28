@@ -4,7 +4,6 @@ import (
 	"ProjectModule/model"
 	"errors"
 	"fmt"
-	"reflect"
 )
 
 type ConfigGroupInMemRepository struct {
@@ -48,11 +47,32 @@ func (c *ConfigGroupInMemRepository) DeleteConfigInListByLabels(name string, ver
 		return err
 	}
 
+	fmt.Println("Provided labels:", labels)
+
 	// Iterate over the configInList and remove those that match the provided labels
 	var updatedConfigInList []model.ConfigInList
+LabelLoop:
 	for _, configInList := range configGroup.ConfigInList {
-		if !reflect.DeepEqual(configInList.Labels, labels) {
+
+		// Check if the number of labels in the configInList matches the number of provided labels
+		if len(configInList.Labels) != len(labels) {
 			updatedConfigInList = append(updatedConfigInList, configInList)
+			continue
+		}
+
+		// Iterate over the provided labels and compare them with the labels in the configInList
+		for _, providedLabel := range labels {
+			found := false
+			for labelName, labelValue := range configInList.Labels {
+				if providedLabel.Name == labelName && providedLabel.Params["value"] == labelValue {
+					found = true
+					break
+				}
+			}
+			if !found {
+				updatedConfigInList = append(updatedConfigInList, configInList)
+				continue LabelLoop
+			}
 		}
 	}
 
@@ -63,6 +83,7 @@ func (c *ConfigGroupInMemRepository) DeleteConfigInListByLabels(name string, ver
 	return nil
 }
 
+
 func (c *ConfigGroupInMemRepository) GetConfigInListByLabels(name string, version int, labels []model.ConfigInList) ([]model.ConfigInList, error) {
 	// Get the configGroup from the repository
 	configGroup, err := c.GetGroup(name, version)
@@ -71,7 +92,7 @@ func (c *ConfigGroupInMemRepository) GetConfigInListByLabels(name string, versio
 	}
 
 	// Print labels for debugging
-	fmt.Println("Provided labels:", labels)
+	//fmt.Println("Provided labels:", labels)
 
 	// Initialize a slice to store matching configInList
 	var matchingConfigInList []model.ConfigInList
@@ -80,7 +101,7 @@ func (c *ConfigGroupInMemRepository) GetConfigInListByLabels(name string, versio
 LabelLoop:
 	for _, configInList := range configGroup.ConfigInList {
 
-		fmt.Println("ConfigInList labels:", configInList.Labels)
+		//fmt.Println("ConfigInList labels:", configInList.Labels)
 
 		// Check if the number of labels in the configInList matches the number of provided labels
 		if len(configInList.Labels) != len(labels) {
