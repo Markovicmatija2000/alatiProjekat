@@ -30,7 +30,12 @@ func main() {
     	fmt.Println("Error initializing Consul repository:", err)
     	os.Exit(1)
 	}
-	repo2 := repositories.NewConfigGroupInMemRepository()
+
+	repo2, err := repositories.NewConfigGroupConsulRepository()
+	if err != nil {
+		fmt.Println("Error initializing ConfigGroup Consul repository:", err)
+		os.Exit(1)
+	}
 	service := services.NewConfigService(repoS)
 	groupService := services.NewConfigGroupService(repo2)
 	simulateOperations(service, repoS)
@@ -40,7 +45,7 @@ func main() {
 	configGroupHandler := handlers.NewConfigGroupHandler(groupService)
 
 	router := mux.NewRouter()
-	limiter := rate.NewLimiter(0.167, 1)
+	limiter := rate.NewLimiter(0.5, 1)
 	router.HandleFunc("/configs/{name}/{version}", func(w http.ResponseWriter, r *http.Request) {
 		handlers.RateLimit(limiter, http.HandlerFunc(configHandler.Get)).ServeHTTP(w, r)
 	}).Methods("GET")

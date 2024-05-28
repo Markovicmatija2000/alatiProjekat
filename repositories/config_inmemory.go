@@ -18,6 +18,7 @@ func NewConfigInMemRepository() model.ConfigRepository {
 	}
 }
 
+
 func (c *ConfigInMemRepository) Add(config model.Config) error {
 	key := fmt.Sprintf("%s/%d", config.Name, config.Version)
 	c.configs[key] = config
