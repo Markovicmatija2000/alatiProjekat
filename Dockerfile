@@ -1,17 +1,32 @@
-#  base image sa gooom
-FROM golang:1.17-alpine
+# Stage 1: Build the application
+FROM golang:1.17-alpine AS builder
 
-# postavlja se radni direktorijum
+# Set working directory
 WORKDIR /app
 
-# kopira se cijeli projekat
+# Copy the go.mod and go.sum files
+COPY go.mod go.sum ./
+
+# Download dependencies
+RUN go mod download
+
+# Copy the source code
 COPY . .
 
-# Builduje se aplikacija
+# Build the application
 RUN go build -o main .
 
-# otvara se port na kom slusa aplikacija zahtjeve
+# Stage 2: Create the final image
+FROM alpine:latest
+
+# Set working directory
+WORKDIR /root/
+
+# Copy the built application from the builder stage
+COPY --from=builder /app/main .
+
+# Expose the port the application listens on
 EXPOSE 8000
 
-# Definisemo komandu sa kojom pokrecemo
+# Define the command to run the application
 CMD ["./main"]
