@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  consul:
+    image: consul:1.10.3
+    ports:
+      - "8500:8500" # Consul UI port
+    volumes:
+      - consul_data:/consul/data # Persist Consul data
+
+  app:
+    build: .
+    ports:
+      - "8000:8000" # Port the application listens on
+    depends_on:
+      - consul
+      - database
+    environment:
+      - CONSUL_HTTP_ADDR=consul:8500 # Consul address
+    volumes:
+      - app_data:/app/data # Persist application data
+
+  database:
+    image: mongo:4.4.6 # Example using MongoDB
+    ports:
+      - "27017:27017" # MongoDB port
+    volumes:
+      - mongo_data:/data/db # Persist MongoDB data
+
+volumes:
+  consul_data:
+  app_data:
+  mongo_data:

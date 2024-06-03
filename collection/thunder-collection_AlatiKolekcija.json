@@ -1,0 +1,134 @@
+{
+    "clientName": "Thunder Client",
+    "collectionName": "AlatiKolekcija",
+    "collectionId": "ab23fc32-cf27-4376-8dd5-d11282c8cd6f",
+    "dateExported": "2024-05-14T20:57:34.361Z",
+    "version": "1.2",
+    "folders": [],
+    "requests": [
+        {
+            "_id": "d0aeed79-a2fa-4702-9e5d-8106c23e5483",
+            "colId": "ab23fc32-cf27-4376-8dd5-d11282c8cd6f",
+            "containerId": "",
+            "name": "GET for Config",
+            "url": "localhost:8000/configs/TestConfig/1",
+            "method": "GET",
+            "sortNum": 40000,
+            "created": "2024-04-23T19:52:18.902Z",
+            "modified": "2024-04-24T11:07:11.917Z",
+            "headers": []
+        },
+        {
+            "_id": "13cf1865-b0e9-4da0-b4b0-14a4f1121b00",
+            "colId": "ab23fc32-cf27-4376-8dd5-d11282c8cd6f",
+            "containerId": "",
+            "name": "POST for Config",
+            "url": "localhost:8000/configs",
+            "method": "POST",
+            "sortNum": 50000,
+            "created": "2024-04-23T19:53:22.002Z",
+            "modified": "2024-04-23T19:53:22.002Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"TestConfig\",\n  \"version\": 1,\n  \"params\": {\n    \"params\": \"params1\",\n    \"params2\": \"params2\"\n  }\n}",
+                "form": []
+            }
+        },
+        {
+            "_id": "2f53cc2e-9514-4edd-87eb-5a34c3e83fa2",
+            "colId": "ab23fc32-cf27-4376-8dd5-d11282c8cd6f",
+            "containerId": "",
+            "name": "DELETE for Config",
+            "url": "localhost:8000/configs/TestConfig/1",
+            "method": "DELETE",
+            "sortNum": 60000,
+            "created": "2024-04-23T19:53:40.748Z",
+            "modified": "2024-04-23T19:53:40.748Z",
+            "headers": []
+        },
+        {
+            "_id": "a70a185d-8eb4-448f-9536-585478bfae58",
+            "colId": "ab23fc32-cf27-4376-8dd5-d11282c8cd6f",
+            "containerId": "",
+            "name": "POST for ConfigGroup",
+            "url": "localhost:8000/configgroups",
+            "method": "POST",
+            "sortNum": 70000,
+            "created": "2024-04-23T19:58:21.946Z",
+            "modified": "2024-05-14T16:41:37.685Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"TestGroup1\",\n  \"version\": 1,\n  \"configInList\": [\n    {\n      \"name\": \"Config1\",\n      \"params\": {\n        \"param1\": \"value1\",\n        \"param2\": \"value2\"\n      },\n      \"labels\": {\n        \"l1\": \"v1\",\n        \"l2\": \"v2\"\n      }\n    }\n  ]\n}\n\n",
+                "form": []
+            }
+        },
+        {
+            "_id": "e38695dd-61ae-4af1-9ace-088ec2926d19",
+            "colId": "ab23fc32-cf27-4376-8dd5-d11282c8cd6f",
+            "containerId": "",
+            "name": "GET for ConfigGroup",
+            "url": "localhost:8000/configgroups/TestGroup1/1",
+            "method": "GET",
+            "sortNum": 80000,
+            "created": "2024-04-23T19:59:07.202Z",
+            "modified": "2024-05-14T16:41:48.281Z",
+            "headers": []
+        },
+        {
+            "_id": "71a1b35f-437e-4390-8ce0-4d6528debae7",
+            "colId": "ab23fc32-cf27-4376-8dd5-d11282c8cd6f",
+            "containerId": "",
+            "name": "DELETE for ConfigGroup",
+            "url": "localhost:8000/configgroups/TestGroup1/1",
+            "method": "DELETE",
+            "sortNum": 90000,
+            "created": "2024-04-23T19:59:38.156Z",
+            "modified": "2024-04-24T11:08:41.602Z",
+            "headers": []
+        },
+        {
+            "_id": "39fa8b5c-66c8-4b52-a993-fb7b5e5f0fa2",
+            "colId": "ab23fc32-cf27-4376-8dd5-d11282c8cd6f",
+            "containerId": "",
+            "name": "Shutdown",
+            "url": "localhost:8000/shutdown",
+            "method": "POST",
+            "sortNum": 100000,
+            "created": "2024-04-23T20:02:10.727Z",
+            "modified": "2024-04-23T20:02:10.727Z",
+            "headers": []
+        },
+        {
+            "_id": "e47dde1c-561b-48e8-9d17-d141bbba0f68",
+            "colId": "ab23fc32-cf27-4376-8dd5-d11282c8cd6f",
+            "containerId": "",
+            "name": "PUT for Config in ConfigGroup",
+            "url": "localhost:8000/configgroups/TestGroup1/1",
+            "method": "PUT",
+            "sortNum": 130000,
+            "created": "2024-05-14T14:20:44.074Z",
+            "modified": "2024-05-14T20:52:20.247Z",
+            "headers": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"Test1\",\n  \"params\": {\n    \"param1\": \"value1\",\n    \"param2\": \"value2\"\n  },\n  \"labels\": {\n    \"l3\": \"v3\",\n    \"l4\": \"v4\"\n  }\n}\n",
+                "form": []
+            }
+        },
+        {
+            "_id": "35f2f54e-c9fe-4591-8303-ea78a7818542",
+            "colId": "ab23fc32-cf27-4376-8dd5-d11282c8cd6f",
+            "containerId": "",
+            "name": "GET for Config in ConfigGroup using Labels",
+            "url": "localhost:8000/configgroups/TestGroup1/1/l1:v1;l2:v2",
+            "method": "GET",
+            "sortNum": 140000,
+            "created": "2024-05-14T20:56:17.284Z",
+            "modified": "2024-05-14T20:56:17.284Z",
+            "headers": []
+        }
+    ],
+    "ref": "z00VgmqJRMxyuGC4MUpXO-ky681QI0tmBOBi7YIYlVP7zlivosKjlqByRxRvH1KIx9s7IJ9yy2hRrWmUc3o_NQ"
+}
